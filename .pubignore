@@ -1,0 +1,6 @@
+# Files to exclude from publication
+coverage/
+.vscode/
+.dart_tool/
+.git/
+*.lock 

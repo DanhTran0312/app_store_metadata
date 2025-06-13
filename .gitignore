@@ -1,0 +1,24 @@
+# https://dart.dev/guides/libraries/private-files
+# Created by `dart pub`
+.dart_tool/
+
+# Build artifacts
+build/
+*.dill
+
+# Coverage
+coverage/
+*.lcov
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Pub files
+pubspec.lock
+.packages

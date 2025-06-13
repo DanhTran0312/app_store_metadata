@@ -1,0 +1,17 @@
+name: app_store_metadata
+description: A Dart SDK for fetching app metadata from Google Play Store and Apple App Store
+version: 1.0.0
+homepage: https://github.com/your-username/app_store_metadata
+repository: https://github.com/your-username/app_store_metadata
+documentation: https://github.com/your-username/app_store_metadata
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  http: ^1.4.0
+  html: ^0.15.6
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.24.0
