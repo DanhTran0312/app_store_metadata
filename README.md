@@ -256,4 +256,4 @@ See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
 
 ## Support
 
-If you encounter any issues or have questions, please [file an issue](https://github.com/your-username/app_store_metadata/issues) on GitHub.
+If you encounter any issues or have questions, please [file an issue](https://github.com/DanhTran0312/app_store_metadata/issues) on GitHub.
