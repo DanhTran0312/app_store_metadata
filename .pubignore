@@ -3,4 +3,12 @@ coverage/
 .vscode/
 .dart_tool/
 .git/
-*.lock 
+pubspec.lock
+
+# Specific files that are gitignored but checked in
+.vscode/settings.json
+coverage/test/app_info_test.dart.vm.json
+coverage/test/app_store_client_test.dart.vm.json
+coverage/test/apple_app_store_test.dart.vm.json
+coverage/test/exceptions_test.dart.vm.json
+coverage/test/google_play_store_test.dart.vm.json 
