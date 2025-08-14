@@ -3,18 +3,25 @@
 [![pub package](https://img.shields.io/pub/v/app_store_metadata.svg)](https://pub.dev/packages/app_store_metadata)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A Dart SDK for fetching app metadata from Google Play Store and Apple App Store. This package provides a unified interface to retrieve comprehensive app information including ratings, descriptions, screenshots, pricing, and more.
+A comprehensive Dart SDK for fetching rich app metadata from Google Play Store and Apple App Store. This package provides a unified interface to retrieve detailed app information including ratings, descriptions, multiple screenshot types, artwork, technical specifications, and much more.
 
 ## Features
 
 - ✅ **Google Play Store** metadata fetching
-- ✅ **Apple App Store** metadata fetching and search
-- ✅ **Unified API** for both platforms
-- ✅ **Rich metadata** including ratings, screenshots, pricing
+- ✅ **Apple App Store** metadata fetching and search with **complete iTunes API coverage**
+- ✅ **Unified API** for both platforms with **100% backward compatibility**
+- ✅ **Enhanced metadata** including multiple screenshot types, artwork sizes, detailed ratings
+- ✅ **Rich iTunes support** with file sizes, supported devices, languages, genres, and more
+- ✅ **dart_mappable integration** for efficient serialization/deserialization
+- ✅ **Multiple artwork sizes** (60x60, 100x100, 512x512)
+- ✅ **Detailed ratings** (overall + current version ratings)
+- ✅ **Technical specifications** (file size, minimum OS, supported devices)
+- ✅ **Gaming features** (Game Center support detection)
+- ✅ **Enterprise features** (VPP device-based licensing)
 - ✅ **Country/language support** for localized data
-- ✅ **Type-safe** Dart models
+- ✅ **Type-safe** Dart models with generated code
 - ✅ **Error handling** with custom exceptions
-- ✅ **Well documented** and tested
+- ✅ **Comprehensive testing** with real API verification
 
 ## Installation
 
@@ -22,7 +29,7 @@ Add this package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  app_store_metadata: ^1.0.0
+  app_store_metadata: ^2.0.0
 ```
 
 Then run:
@@ -42,13 +49,62 @@ void main() async {
   // Fetch app from Google Play Store
   final androidApp = await client.getGooglePlayAppInfo('com.whatsapp');
   print('${androidApp.name} - Rating: ${androidApp.rating}');
+  print('Screenshots: ${androidApp.screenshots.length}');
 
-  // Fetch app from Apple App Store
+  // Fetch app from Apple App Store with rich metadata
   final iosApp = await client.getAppleAppStoreInfo(
-    bundleId: 'net.whatsapp.WhatsApp'
+    bundleId: 'com.google.Drive'
   );
   print('${iosApp.name} - Version: ${iosApp.version}');
+  print('File Size: ${iosApp.fileSizeBytes} bytes');
+  print('Screenshots: ${iosApp.screenshots.length}');
+  print('iPad Screenshots: ${iosApp.ipadScreenshots.length}');
+  print('Supported Languages: ${iosApp.languageCodes.length}');
+  print('Game Center: ${iosApp.isGameCenterEnabled}');
 }
+```
+
+## 🚀 What's New in v2.0
+
+### Enhanced iTunes/App Store Support
+The AppInfo model now includes **comprehensive iTunes API coverage**:
+
+```dart
+final app = await client.getAppleAppStoreInfo(appId: '507874739');
+
+// Multiple screenshot types
+print('iPhone Screenshots: ${app.screenshots.length}');
+print('iPad Screenshots: ${app.ipadScreenshots.length}');
+print('Apple TV Screenshots: ${app.appletvScreenshots.length}');
+
+// Multiple artwork sizes
+print('Icon 60x60: ${app.artworkUrl60}');
+print('Icon 512x512: ${app.artworkUrl512}');
+
+// Detailed ratings
+print('Overall Rating: ${app.rating} (${app.ratingCount} reviews)');
+print('Current Version Rating: ${app.currentVersionRating}');
+
+// Rich metadata
+print('File Size: ${app.fileSizeBytes} bytes');
+print('Minimum iOS: ${app.minimumOsVersion}');
+print('Supported Languages: ${app.languageCodes.join(', ')}');
+print('Genres: ${app.genres.join(', ')}');
+print('Game Center Enabled: ${app.isGameCenterEnabled}');
+```
+
+### Direct iTunes JSON Support
+Use the new factory constructor for direct iTunes API integration:
+
+```dart
+// If you're working directly with iTunes API responses
+final itunesResponse = await http.get(Uri.parse('https://itunes.apple.com/lookup?id=507874739'));
+final data = json.decode(itunesResponse.body);
+final appInfo = AppInfo.fromItunesJson(data['results'][0]);
+
+// All iTunes fields are now directly accessible
+print('Supported Devices: ${appInfo.supportedDevices.join(', ')}');
+print('VPP Licensed: ${appInfo.isVppDeviceBasedLicensingEnabled}');
 ```
 
 ## Usage
@@ -157,33 +213,102 @@ Searches for apps in Apple App Store.
 - **limit**: Maximum results (default: `10`)
 - **Returns**: `Future<List<AppInfo>>`
 
-### AppInfo Model
+### Enhanced AppInfo Model
 
-The data model representing app metadata:
+The comprehensive data model representing rich app metadata with full iTunes API support:
 
 ```dart
 class AppInfo {
-  final String id;              // App identifier
+  // Core Identity Fields
+  final String id;              // App identifier (trackId for iOS, packageId for Android)
   final String name;            // App name
+  final String? trackCensoredName; // iOS censored name
+  final String? bundleId;       // Bundle identifier
+  final String? kind;           // iOS app type (e.g., "software")
+  
+  // Developer/Publisher Information  
   final String developer;       // Developer name
+  final int? artistId;          // iOS artist ID
+  final String? artistViewUrl;  // iOS artist page URL
+  final String? sellerName;     // iOS seller name
+  final String? sellerUrl;      // iOS seller URL
+  
+  // App Description & Content
   final String? description;    // Full description
-  final String? summary;        // Short description
+  final String? summary;        // Short description/release notes
+  final String? releaseNotes;   // iOS release notes
+  
+  // Ratings & Reviews (Enhanced)
   final double? rating;         // Average rating (0.0-5.0)
   final int? ratingCount;       // Number of ratings
+  final double? currentVersionRating;     // iOS current version rating
+  final int? currentVersionRatingCount;   // iOS current version rating count
+  
+  // Pricing Information
   final String? price;          // Price (e.g., "Free", "$2.99")
+  final double? priceAmount;    // Actual price value
   final String? currency;       // Currency code
-  final String? iconUrl;        // App icon URL
-  final List<String> screenshots; // Screenshot URLs
-  final String? category;       // App category
+  
+  // App Icons & Artwork (Multiple Sizes)
+  final String? iconUrl;        // Primary app icon URL
+  final String? artworkUrl60;   // iOS 60x60 icon
+  final String? artworkUrl100;  // iOS 100x100 icon  
+  final String? artworkUrl512;  // iOS 512x512 icon
+  
+  // Screenshots (Multiple Types)
+  final List<String> screenshots;      // Combined screenshots for compatibility
+  final List<String> ipadScreenshots;  // iOS iPad screenshots
+  final List<String> appletvScreenshots; // iOS Apple TV screenshots
+  
+  // Categories & Genres (Enhanced)
+  final String? category;       // Primary app category
+  final int? primaryGenreId;    // iOS primary genre ID
+  final List<String> genres;    // iOS genre names
+  final List<String> genreIds;  // iOS genre IDs
+  
+  // Content Rating (Enhanced)
   final String? contentRating;  // Content rating
+  final String? contentAdvisoryRating; // iOS advisory rating
+  final List<String> advisories; // iOS content advisories
+  
+  // Version & Technical Information
   final String? version;        // Current version
-  final String? lastUpdated;    // Last update date
+  final String? minimumOsVersion; // iOS minimum OS version
+  final String? fileSizeBytes;  // iOS file size in bytes
+  final List<String> supportedDevices; // iOS supported devices
+  final List<String> features;  // iOS features (e.g., "iosUniversal")
+  final List<String> languageCodes; // iOS supported language codes
+  
+  // Release Dates  
+  final String? releaseDate;    // Original release date
+  final String? currentVersionReleaseDate; // iOS current version release date
+  final String? lastUpdated;    // Last update date (compatibility)
+  
+  // URLs & Links
   final String? downloadUrl;    // Download/store URL
-  final int? downloads;         // Download count
-  final String? bundleId;       // Bundle identifier
+  
+  // Gaming Features
+  final bool? isGameCenterEnabled; // iOS Game Center support
+  
+  // Enterprise Features  
+  final bool? isVppDeviceBasedLicensingEnabled; // iOS VPP licensing
+  
+  // Android-specific fields
+  final int? downloads;         // Android download count
+  
+  // Additional platform-specific data (Backward compatibility)
   final Map<String, dynamic>? additionalInfo; // Extra data
 }
 ```
+
+### 🔄 Backward Compatibility
+
+**All existing code continues to work without changes!** The model has been enhanced while maintaining full backward compatibility:
+
+- All original fields remain accessible
+- `screenshots` field combines all screenshot types for compatibility  
+- `additionalInfo` is still populated with technical data
+- Existing APIs (`getGooglePlayAppInfo`, `getAppleAppStoreInfo`) work unchanged
 
 ### Error Handling
 
@@ -222,6 +347,54 @@ Use ISO 639-1 language codes for Google Play Store:
 - `de` - German
 - `ja` - Japanese
 - And more...
+
+## 🔧 Migration from v1.x to v2.0
+
+**Good news: No breaking changes!** Your existing code will work without any modifications.
+
+### What Works Unchanged
+```dart
+// ✅ All v1.x code continues to work
+final app = await client.getAppleAppStoreInfo(bundleId: 'com.example.app');
+print(app.name);           // ✅ Still works
+print(app.screenshots);    // ✅ Still works (combines all screenshot types)
+print(app.rating);         // ✅ Still works  
+print(app.additionalInfo); // ✅ Still works (populated with technical data)
+```
+
+### What's New and Available
+```dart
+// 🆕 New fields you can now access
+final app = await client.getAppleAppStoreInfo(bundleId: 'com.example.app');
+
+// Enhanced screenshots
+print(app.ipadScreenshots);    // 🆕 iPad-specific screenshots
+print(app.appletvScreenshots); // 🆕 Apple TV screenshots  
+
+// Multiple artwork sizes
+print(app.artworkUrl512);      // 🆕 High-resolution icon
+print(app.artworkUrl60);       // 🆕 Small icon
+
+// Detailed ratings
+print(app.currentVersionRating); // 🆕 Current version rating
+
+// Rich technical data  
+print(app.fileSizeBytes);      // 🆕 File size
+print(app.minimumOsVersion);   // 🆕 Minimum OS
+print(app.supportedDevices);   // 🆕 Supported devices
+print(app.languageCodes);      // 🆕 Supported languages
+
+// Gaming & enterprise features
+print(app.isGameCenterEnabled); // 🆕 Game Center support
+print(app.isVppDeviceBasedLicensingEnabled); // 🆕 Enterprise licensing
+```
+
+### Direct iTunes API Integration
+```dart
+// 🆕 New factory constructor for direct iTunes data
+final itunesData = {'trackId': 123, 'trackName': 'My App', ...};
+final app = AppInfo.fromItunesJson(itunesData);
+```
 
 ## Examples
 

@@ -111,7 +111,7 @@ void main() {
           'additionalInfo': {'key': 'value'},
         };
 
-        final appInfo = AppInfo.fromJson(json);
+        final appInfo = AppInfoMapper.fromMap(json);
 
         expect(appInfo.id, equals('123'));
         expect(appInfo.name, equals('Test App'));
@@ -141,7 +141,7 @@ void main() {
           'developer': 'Test Developer',
         };
 
-        final appInfo = AppInfo.fromJson(json);
+        final appInfo = AppInfoMapper.fromMap(json);
 
         expect(appInfo.id, equals('123'));
         expect(appInfo.name, equals('Test App'));
@@ -159,7 +159,7 @@ void main() {
           'screenshots': null,
         };
 
-        final appInfo = AppInfo.fromJson(json);
+        final appInfo = AppInfoMapper.fromMap(json);
 
         expect(appInfo.screenshots, isEmpty);
       });
@@ -172,7 +172,7 @@ void main() {
           'rating': 4,
         };
 
-        final appInfo = AppInfo.fromJson(json);
+        final appInfo = AppInfoMapper.fromMap(json);
 
         expect(appInfo.rating, equals(4.0));
       });
@@ -195,7 +195,7 @@ void main() {
           additionalInfo: {'key': 'value'},
         );
 
-        final json = appInfo.toJson();
+        final json = appInfo.toMap();
 
         expect(json['id'], equals('123'));
         expect(json['name'], equals('Test App'));
@@ -221,7 +221,7 @@ void main() {
           screenshots: [],
         );
 
-        final json = appInfo.toJson();
+        final json = appInfo.toMap();
 
         expect(json['id'], equals('123'));
         expect(json['name'], equals('Test App'));
@@ -292,8 +292,8 @@ void main() {
           additionalInfo: {'key': 'value'},
         );
 
-        final json = originalAppInfo.toJson();
-        final reconstructedAppInfo = AppInfo.fromJson(json);
+        final json = originalAppInfo.toMap();
+        final reconstructedAppInfo = AppInfoMapper.fromMap(json);
 
         expect(reconstructedAppInfo.id, equals(originalAppInfo.id));
         expect(reconstructedAppInfo.name, equals(originalAppInfo.name));

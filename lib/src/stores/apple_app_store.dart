@@ -135,40 +135,8 @@ class AppleAppStore {
 
   /// Parse JSON response from Apple App Store
   AppInfo _parseAppStoreJson(Map<String, dynamic> json) {
-    // Extract screenshots
-    final screenshots = <String>[];
-    if (json['screenshotUrls'] != null) {
-      screenshots.addAll((json['screenshotUrls'] as List).cast<String>());
-    }
-    if (json['ipadScreenshotUrls'] != null) {
-      screenshots.addAll((json['ipadScreenshotUrls'] as List).cast<String>());
-    }
-
-    return AppInfo(
-      id: json['trackId'].toString(),
-      name: json['trackName'] ?? 'Unknown App',
-      developer: json['artistName'] ?? 'Unknown Developer',
-      description: json['description'],
-      summary: json['releaseNotes'],
-      rating: (json['averageUserRating'] as num?)?.toDouble(),
-      ratingCount: json['userRatingCount'] as int?,
-      price: json['formattedPrice'] ?? 'Free',
-      currency: json['currency'],
-      iconUrl: json['artworkUrl512'] ?? json['artworkUrl100'],
-      screenshots: screenshots,
-      category: json['primaryGenreName'],
-      contentRating: json['trackContentRating'],
-      version: json['version'],
-      lastUpdated: json['currentVersionReleaseDate'],
-      downloadUrl: json['trackViewUrl'],
-      bundleId: json['bundleId'],
-      additionalInfo: {
-        'fileSize': json['fileSizeBytes'],
-        'minimumOsVersion': json['minimumOsVersion'],
-        'supportedDevices': json['supportedDevices'],
-        'languageCodesISO2A': json['languageCodesISO2A'],
-      },
-    );
+    // Use the new fromItunesJson factory method to get all iTunes fields
+    return AppInfo.fromItunesJson(json);
   }
 
   void dispose() {

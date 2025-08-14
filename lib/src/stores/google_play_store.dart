@@ -139,17 +139,37 @@ class GooglePlayStore {
     final price = priceElement?.text.trim() ?? 'Free';
 
     return AppInfo(
+      // Core Identity Fields
       id: packageId,
       name: finalName,
       developer: developer,
+      bundleId: packageId, // Use packageId as bundleId for Android
+      // App Description & Content
       description: description,
+
+      // Ratings & Reviews
       rating: rating,
-      iconUrl: iconUrl,
-      screenshots: screenshots,
-      category: category,
-      version: version,
+
+      // Pricing Information
       price: price,
+
+      // App Icons & Artwork
+      iconUrl: iconUrl,
+
+      // Screenshots (only regular screenshots for Android)
+      screenshots: screenshots,
+
+      // Categories & Genres
+      category: category,
+
+      // Version & Technical Information
+      version: version,
+
+      // URLs & Links
       downloadUrl: '$_baseUrl/store/apps/details?id=$packageId',
+
+      // Android-specific fields would go here if we had them
+      // downloads: downloads, // Could be extracted if available
     );
   }
 
