@@ -133,6 +133,56 @@ class AppleAppStore {
     }
   }
 
+  /// Fetch multiple apps information from Apple App Store
+  ///
+  /// [appIds] List of Apple app IDs (numeric IDs)
+  /// [country] Optional country code (e.g., 'US', 'GB')
+  /// Returns a map where keys are the requested IDs and values are AppInfo objects.
+  /// Failed lookups will not be included in the result map.
+  Future<Map<String, AppInfo>> getMultipleAppInfo(
+    List<String> appIds, {
+    String country = 'US',
+  }) async {
+    if (appIds.isEmpty) {
+      throw AppStoreException('App IDs list cannot be empty');
+    }
+
+    // Apple's iTunes API supports up to 200 IDs per request
+    final batchSize = 200;
+    final result = <String, AppInfo>{};
+
+    try {
+      // Process in batches if we have more than 200 IDs
+      for (int i = 0; i < appIds.length; i += batchSize) {
+        final batch = appIds.skip(i).take(batchSize);
+        final idsString = batch.join(',');
+        final lookupUrl = '$_lookupUrl?id=$idsString&country=$country';
+
+        final response = await _httpClient.get(Uri.parse(lookupUrl));
+
+        if (response.statusCode != 200) {
+          throw AppStoreException(
+            'Failed to fetch batch app info (Status: ${response.statusCode})',
+          );
+        }
+
+        final data = json.decode(response.body);
+        final results = data['results'] as List;
+
+        // Map results back to their IDs
+        for (final appJson in results) {
+          final appInfo = _parseAppStoreJson(appJson);
+          result[appInfo.id] = appInfo;
+        }
+      }
+
+      return result;
+    } catch (e) {
+      if (e is AppStoreException) rethrow;
+      throw AppStoreException('Failed to fetch multiple app info: $e');
+    }
+  }
+
   /// Parse JSON response from Apple App Store
   AppInfo _parseAppStoreJson(Map<String, dynamic> json) {
     // Use the new fromItunesJson factory method to get all iTunes fields

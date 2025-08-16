@@ -9,6 +9,7 @@ A comprehensive Dart SDK for fetching rich app metadata from Google Play Store a
 
 - ✅ **Google Play Store** metadata fetching
 - ✅ **Apple App Store** metadata fetching and search with **complete iTunes API coverage**
+- ✅ **Batch processing** for fetching multiple apps efficiently
 - ✅ **Unified API** for both platforms with **100% backward compatibility**
 - ✅ **Enhanced metadata** including multiple screenshot types, artwork sizes, detailed ratings
 - ✅ **Rich iTunes support** with file sizes, supported devices, languages, genres, and more
@@ -29,7 +30,7 @@ Add this package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  app_store_metadata: ^2.0.0
+  app_store_metadata: ^2.1.0
 ```
 
 Then run:
@@ -63,6 +64,50 @@ void main() async {
   print('Game Center: ${iosApp.isGameCenterEnabled}');
 }
 ```
+
+## 🚀 Batch Processing
+
+Efficiently fetch metadata for multiple apps at once:
+
+```dart
+import 'package:app_store_metadata/app_store_metadata.dart';
+
+void main() async {
+  final client = AppStoreClient();
+
+  // Fetch multiple Google Play Store apps
+  final googlePlayApps = await client.getMultipleGooglePlayAppInfo([
+    'com.whatsapp',
+    'com.facebook.katana',
+    'com.instagram.android',
+  ]);
+
+  // Results are returned as a Map<String, AppInfo>
+  for (final entry in googlePlayApps.entries) {
+    print('${entry.key}: ${entry.value.name} - ${entry.value.rating}★');
+  }
+
+  // Fetch multiple Apple App Store apps
+  final appleApps = await client.getMultipleAppleAppStoreInfo([
+    '310633997', // WhatsApp
+    '284882215', // Facebook
+    '389801252', // Instagram
+  ]);
+
+  // Process results
+  for (final entry in appleApps.entries) {
+    final app = entry.value;
+    print('${app.name}: ${app.version} (${app.fileSizeBytes} bytes)');
+  }
+}
+```
+
+### Batch Processing Benefits
+
+- **Efficient**: Apple App Store batch requests use the native iTunes API (up to 200 apps per request)
+- **Concurrent**: Google Play Store requests are made concurrently for optimal performance  
+- **Resilient**: Failed individual app lookups don't affect successful ones
+- **Flexible**: Mix and match different app stores and regions
 
 ## 🚀 What's New in v2.0
 
@@ -212,6 +257,25 @@ Searches for apps in Apple App Store.
 - **country**: Country code (default: `'US'`)
 - **limit**: Maximum results (default: `10`)
 - **Returns**: `Future<List<AppInfo>>`
+
+##### `getMultipleGooglePlayAppInfo(List<String> packageIds, {String country, String language})`
+
+Fetches app metadata for multiple Google Play Store apps.
+
+- **packageIds**: List of Android package IDs (e.g., `['com.whatsapp', 'com.facebook.katana']`)
+- **country**: Country code (default: `'US'`)
+- **language**: Language code (default: `'en'`)
+- **Returns**: `Future<Map<String, AppInfo>>` - Map where keys are package IDs and values are AppInfo objects
+
+##### `getMultipleAppleAppStoreInfo(List<String> appIds, {String country})`
+
+Fetches app metadata for multiple Apple App Store apps.
+
+- **appIds**: List of Apple app IDs (e.g., `['310633997', '284882215']`)
+- **country**: Country code (default: `'US'`)
+- **Returns**: `Future<Map<String, AppInfo>>` - Map where keys are app IDs and values are AppInfo objects
+
+*Note: Failed lookups will not be included in the result map for both batch methods.*
 
 ### Enhanced AppInfo Model
 

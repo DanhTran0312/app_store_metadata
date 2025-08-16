@@ -189,6 +189,55 @@ void main() {
           throwsA(isA<AppStoreException>()),
         );
       });
+
+      test('should fetch multiple apps successfully', () async {
+        final mockResponse = {
+          'resultCount': 2,
+          'results': [
+            {
+              'trackId': 310633997,
+              'trackName': 'WhatsApp Messenger',
+              'artistName': 'WhatsApp Inc.',
+              'bundleId': 'net.whatsapp.WhatsApp',
+              'formattedPrice': 'Free',
+            },
+            {
+              'trackId': 284882215,
+              'trackName': 'Facebook',
+              'artistName': 'Meta Platforms, Inc.',
+              'bundleId': 'com.facebook.Facebook',
+              'formattedPrice': 'Free',
+            },
+          ],
+        };
+
+        final mockClient = MockClient((request) async {
+          expect(
+            request.url.toString(),
+            contains('lookup?id=310633997,284882215'),
+          );
+          return http.Response(json.encode(mockResponse), 200);
+        });
+
+        final appleStore = AppleAppStore(httpClient: mockClient);
+        final testClient = AppStoreClient(appleAppStore: appleStore);
+
+        final results = await testClient.getMultipleAppleAppStoreInfo([
+          '310633997',
+          '284882215',
+        ]);
+
+        expect(results, hasLength(2));
+        expect(results['310633997']?.name, equals('WhatsApp Messenger'));
+        expect(results['284882215']?.name, equals('Facebook'));
+      });
+
+      test('should handle empty app IDs list', () async {
+        expect(
+          () => client.getMultipleAppleAppStoreInfo([]),
+          throwsA(isA<AppStoreException>()),
+        );
+      });
     });
 
     group('Google Play Store', () {
@@ -257,6 +306,58 @@ void main() {
         // Should not throw, but return default values
         expect(appInfo.name, isNotNull);
         expect(appInfo.developer, isNotNull);
+      });
+
+      test('should fetch multiple apps successfully', () async {
+        final mockHtml1 = '''
+          <html>
+            <body>
+              <h1 itemprop="name"><span>WhatsApp Messenger</span></h1>
+              <a href="/store/apps/developer?id=WhatsApp+LLC">WhatsApp LLC</a>
+              <div aria-label="Rated 4.4 stars out of five stars">4.4</div>
+            </body>
+          </html>
+        ''';
+
+        final mockHtml2 = '''
+          <html>
+            <body>
+              <h1 itemprop="name"><span>Facebook</span></h1>
+              <a href="/store/apps/developer?id=Meta+Platforms">Meta Platforms, Inc.</a>
+              <div aria-label="Rated 3.8 stars out of five stars">3.8</div>
+            </body>
+          </html>
+        ''';
+
+        final mockClient = MockClient((request) async {
+          if (request.url.toString().contains('id=com.whatsapp')) {
+            return http.Response(mockHtml1, 200);
+          } else if (request.url.toString().contains(
+            'id=com.facebook.katana',
+          )) {
+            return http.Response(mockHtml2, 200);
+          }
+          return http.Response('Not Found', 404);
+        });
+
+        final googleStore = GooglePlayStore(httpClient: mockClient);
+        final testClient = AppStoreClient(googlePlayStore: googleStore);
+
+        final results = await testClient.getMultipleGooglePlayAppInfo([
+          'com.whatsapp',
+          'com.facebook.katana',
+        ]);
+
+        expect(results, hasLength(2));
+        expect(results['com.whatsapp']?.name, equals('WhatsApp Messenger'));
+        expect(results['com.facebook.katana']?.name, equals('Facebook'));
+      });
+
+      test('should handle empty package IDs list', () async {
+        expect(
+          () => client.getMultipleGooglePlayAppInfo([]),
+          throwsA(isA<AppStoreException>()),
+        );
       });
     });
 

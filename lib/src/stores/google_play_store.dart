@@ -37,6 +37,56 @@ class GooglePlayStore {
     }
   }
 
+  /// Fetch multiple apps information from Google Play Store
+  ///
+  /// [packageIds] List of Android package IDs (e.g., ['com.whatsapp', 'com.example.app'])
+  /// [country] Optional country code (e.g., 'US', 'GB')
+  /// [language] Optional language code (e.g., 'en', 'es')
+  /// Returns a map where keys are the requested package IDs and values are AppInfo objects.
+  /// Failed lookups will not be included in the result map.
+  Future<Map<String, AppInfo>> getMultipleAppInfo(
+    List<String> packageIds, {
+    String country = 'US',
+    String language = 'en',
+  }) async {
+    if (packageIds.isEmpty) {
+      throw AppStoreException('Package IDs list cannot be empty');
+    }
+
+    try {
+      final result = <String, AppInfo>{};
+
+      // Make concurrent requests for all package IDs
+      final futures = packageIds.map((packageId) async {
+        try {
+          final appInfo = await getAppInfo(
+            packageId,
+            country: country,
+            language: language,
+          );
+          return MapEntry(packageId, appInfo);
+        } catch (e) {
+          // Skip failed requests - they won't be included in the result
+          return null;
+        }
+      });
+
+      final results = await Future.wait(futures);
+
+      // Collect successful results
+      for (final entry in results) {
+        if (entry != null) {
+          result[entry.key] = entry.value;
+        }
+      }
+
+      return result;
+    } catch (e) {
+      if (e is AppStoreException) rethrow;
+      throw AppStoreException('Failed to fetch multiple app info: $e');
+    }
+  }
+
   /// Parse HTML response from Google Play Store
   AppInfo _parsePlayStoreHtml(String html, String packageId) {
     final document = html_parser.parse(html);

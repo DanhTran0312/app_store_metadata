@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2025-01-28
+
+### Added
+- **Batch Processing API**: New methods to efficiently fetch multiple apps at once
+- `getMultipleGooglePlayAppInfo()`: Fetch multiple Google Play Store apps concurrently
+- `getMultipleAppleAppStoreInfo()`: Fetch multiple Apple App Store apps using native iTunes batch API
+- **Resilient Error Handling**: Failed individual lookups don't affect successful ones in batch requests
+- **Comprehensive Testing**: Unit tests covering all batch processing scenarios
+
+### Enhanced
+- **Apple App Store Efficiency**: Leverages iTunes API's native support for up to 200 apps per request
+- **Google Play Store Performance**: Concurrent HTTP requests for optimal throughput
+- **Example Applications**: Updated examples to demonstrate batch processing capabilities
+- **API Documentation**: Complete documentation for all new batch methods
+
+### Technical
+- **Return Type**: Batch methods return `Map<String, AppInfo>` for easy ID-to-result mapping
+- **Backward Compatibility**: All existing APIs remain unchanged and fully supported
+- **Error Resilience**: Batch operations continue processing even if individual apps fail
+- **Performance Optimized**: Minimal overhead with efficient request batching strategies
+
 ## [2.0.0] - 2025-01-28
 
 ### Added

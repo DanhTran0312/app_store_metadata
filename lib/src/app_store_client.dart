@@ -79,4 +79,48 @@ class AppStoreClient {
       throw AppStoreException('Failed to search Apple App Store: $e');
     }
   }
+
+  /// Fetch app info for multiple Google Play Store apps
+  ///
+  /// [packageIds] List of Android package IDs (e.g., ['com.whatsapp', 'com.example.app'])
+  /// [country] Optional country code (e.g., 'US', 'GB')
+  /// [language] Optional language code (e.g., 'en', 'es')
+  /// Returns a map where keys are the requested package IDs and values are AppInfo objects.
+  /// Failed lookups will not be included in the result map.
+  Future<Map<String, AppInfo>> getMultipleGooglePlayAppInfo(
+    List<String> packageIds, {
+    String country = 'US',
+    String language = 'en',
+  }) async {
+    try {
+      return await _googlePlayStore.getMultipleAppInfo(
+        packageIds,
+        country: country,
+        language: language,
+      );
+    } catch (e) {
+      throw AppStoreException(
+        'Failed to fetch multiple Google Play app info: $e',
+      );
+    }
+  }
+
+  /// Fetch app info for multiple Apple App Store apps
+  ///
+  /// [appIds] List of Apple app IDs (numeric IDs)
+  /// [country] Optional country code (e.g., 'US', 'GB')
+  /// Returns a map where keys are the requested app IDs and values are AppInfo objects.
+  /// Failed lookups will not be included in the result map.
+  Future<Map<String, AppInfo>> getMultipleAppleAppStoreInfo(
+    List<String> appIds, {
+    String country = 'US',
+  }) async {
+    try {
+      return await _appleAppStore.getMultipleAppInfo(appIds, country: country);
+    } catch (e) {
+      throw AppStoreException(
+        'Failed to fetch multiple Apple App Store info: $e',
+      );
+    }
+  }
 }
